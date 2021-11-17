@@ -1,1 +1,7 @@
+# Environment Var
 .env
+
+# Virtual Env
+bin
+lib
+pyvenv.cfg
