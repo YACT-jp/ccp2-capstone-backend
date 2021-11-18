@@ -15,10 +15,11 @@ client = pymongo.MongoClient(
 db = client['ccp2-capstone']
 mediaCollection = db['media']
 loc = db["locations"]
-for media in mediaCollection.find({},{"Media ID":1, "Name":1, "_id":0}):
+for media in mediaCollection.find({}, {"id": 1, "name": 1, "title": 1, "_id": 0}):
     print(media)
 # for media in loc.find():
 #     print(media)
+
 
 @app.route('/')
 def index():
