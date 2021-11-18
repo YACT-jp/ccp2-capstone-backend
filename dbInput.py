@@ -9,8 +9,8 @@ load_dotenv()
 tmdb.REQUESTS_SESSION = requests.Session()
 tmdb.API_KEY = os.environ.get('tmdb_API')
 
-stop = "n"
-while stop == "n":
+stop = "y"
+while stop == "y":
     # prompts user to enter the name of a movie or tv series
     search = tmdb.Search()
     q = input("Please enter media name: ")
