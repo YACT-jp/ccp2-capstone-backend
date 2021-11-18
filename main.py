@@ -1,4 +1,5 @@
 import json
+from bson import ObjectId
 import os
 from flask import Flask
 import pymongo
@@ -38,8 +39,20 @@ def getMedia():
 @app.route('/api/locations')
 def getLocations():
     result = []
-    for location in locationsCollection.find({}, {"plus_code": True, "name": True, "media_id": True, "_id": False}):
+    for location in locationsCollection.find({}, {"plus_code": True, "name": True, "media_id": True, "_id": 1}):
         print(location)
+        location['_id'] = str(location['_id'])
+        result.append(location)
+    return json.dumps(result)
+
+
+@app.route('/api/locations/<id>')
+def getLocation(id):
+    result = []
+    print(type(id))
+    for location in locationsCollection.find({"_id": ObjectId(id)}):
+        print(location)
+        location['_id'] = str(location['_id'])
         result.append(location)
     return json.dumps(result)
 
