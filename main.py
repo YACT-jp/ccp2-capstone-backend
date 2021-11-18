@@ -14,9 +14,11 @@ client = pymongo.MongoClient(
     f"mongodb+srv://{DB_PROJECT_NAME}:{DB_PASSWORD}@cluster0.y0meq.mongodb.net/{DB_NAME}?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
 db = client['ccp2-capstone']
 mediaCollection = db['media']
-
-for media in mediaCollection.find():
+loc = db["locations"]
+for media in mediaCollection.find({}, {"id": 1, "name": 1, "title": 1, "_id": 0}):
     print(media)
+# for media in loc.find():
+#     print(media)
 
 
 @app.route('/')
