@@ -15,7 +15,7 @@ client = pymongo.MongoClient(
     f"mongodb+srv://{DB_PROJECT_NAME}:{DB_PASSWORD}@cluster0.y0meq.mongodb.net/{DB_NAME}?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
 db = client['ccp2-capstone']
 mediaCollection = db['media']
-locationCollection = db['locations']
+locationsCollection = db['locations']
 
 
 @app.route('/')
@@ -26,12 +26,21 @@ def index():
 @app.route('/api/media')
 def getMedia():
     result = []
-    for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": 0}):
+    for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": False}):
         print(tv)
         result.append(tv)
-    for movie in mediaCollection.find({"media_type": "movie"}, {"id": True, "name": "$title", "_id": 0}):
+    for movie in mediaCollection.find({"media_type": "movie"}, {"id": True, "name": "$title", "_id": False}):
         print(movie)
         result.append(movie)
+    return json.dumps(result)
+
+
+@app.route('/api/locations')
+def getLocations():
+    result = []
+    for location in locationsCollection.find({}, {"plus_code": True, "name": True, "media_id": True, "_id": False}):
+        print(location)
+        result.append(location)
     return json.dumps(result)
 
 
