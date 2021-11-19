@@ -1,3 +1,5 @@
+import json
+from bson import ObjectId
 import os
 from flask import Flask
 import pymongo
@@ -14,16 +16,47 @@ client = pymongo.MongoClient(
     f"mongodb+srv://{DB_PROJECT_NAME}:{DB_PASSWORD}@cluster0.y0meq.mongodb.net/{DB_NAME}?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
 db = client['ccp2-capstone']
 mediaCollection = db['media']
-loc = db["locations"]
-for media in mediaCollection.find({}, {"id": 1, "name": 1, "title": 1, "_id": 0}):
-    print(media)
-# for media in loc.find():
-#     print(media)
+
+locationsCollection = db['locations']
+
 
 
 @app.route('/')
 def index():
     return 'Hello World from Python'
+
+
+@app.route('/api/media')
+def getMedia():
+    result = []
+    for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": False}):
+        print(tv)
+        result.append(tv)
+    for movie in mediaCollection.find({"media_type": "movie"}, {"id": True, "name": "$title", "_id": False}):
+        print(movie)
+        result.append(movie)
+    return json.dumps(result)
+
+
+@app.route('/api/locations')
+def getLocations():
+    result = []
+    for location in locationsCollection.find({}, {"plus_code": True, "name": True, "media_id": True, "_id": 1}):
+        print(location)
+        location['_id'] = str(location['_id'])
+        result.append(location)
+    return json.dumps(result)
+
+
+@app.route('/api/locations/<id>')
+def getLocation(id):
+    result = []
+    print(type(id))
+    for location in locationsCollection.find({"_id": ObjectId(id)}):
+        print(location)
+        location['_id'] = str(location['_id'])
+        result.append(location)
+    return json.dumps(result)
 
 
 if __name__ == "__main__":
