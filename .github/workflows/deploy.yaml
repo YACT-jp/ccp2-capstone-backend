@@ -40,15 +40,14 @@ jobs:
         run: docker push $IMAGE
 
       - name: Deploy to Cloud Run
-        run: |
-          gcloud run deploy $SERVICE_NAME \
-            --image $IMAGE \
-            --port $PORT \
-            --project $GCP_PROJECT_ID \
-            --region $GCP_REGION \
-            --platform=managed \
-            --allow-unauthenticated \
-            --set-env-vars DB_PROJECT_NAME=$DB_PROJECT_NAME \
-            --set-env-vars DB_NAME=$DB_NAME \
-            --set-env-vars DB_PASSWORD=$DB_PASSWORD
-            --quiet
+        run: gcloud run deploy $SERVICE_NAME \
+          --image $IMAGE \
+          --port $PORT \
+          --project $GCP_PROJECT_ID \
+          --region $GCP_REGION \
+          --platform=managed \
+          --allow-unauthenticated \
+          --set-env-vars DB_PROJECT_NAME=$DB_PROJECT_NAME \
+          --set-env-vars DB_NAME=$DB_NAME \
+          --set-env-vars DB_PASSWORD=$DB_PASSWORD \
+          --quiet
