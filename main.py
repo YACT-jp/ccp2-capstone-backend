@@ -24,6 +24,11 @@ def index():
     return 'Hello World from Python'
 
 
+@app.route('/test')
+def test():
+    return 'test'
+
+
 @app.route('/api/media')
 def getMedia():
     result = []
