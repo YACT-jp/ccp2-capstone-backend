@@ -62,6 +62,13 @@ def getLocation(id):
     return json.dumps(result)
 
 
+@app.route('/api/media/<id>')
+def getMediaById(id):
+    media = mediaCollection.find_one({"id": int(id)})
+    media['_id'] = str(media['_id'])
+    return json.dumps(media)
+
+
 @app.route('/api/media/<id>/locations')
 def getMediaLocationById(id):
     result = []
