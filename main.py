@@ -17,6 +17,7 @@ client = pymongo.MongoClient(
 db = client['ccp2-capstone']
 mediaCollection = db['media']
 locationsCollection = db['locations']
+usersCollection = db['users']
 
 
 @app.route('/')
@@ -59,7 +60,7 @@ def getLocation(id):
         print(location)
         location['_id'] = str(location['_id'])
         result.append(location)
-    return json.dumps(result)
+    return json.dumps(result[0])
 
 
 @app.route('/api/media/<id>')
@@ -77,6 +78,16 @@ def getMediaLocationById(id):
         result.append(location)
     return json.dumps(result)
 
+
+@app.route('/api/user/<id>')
+def getUserById(id):
+    result = []
+    print(type(id))
+    for user in usersCollection.find({"_id": ObjectId(id)}):
+        print(user)
+        user['_id'] = str(user['_id'])
+        result.append(user)
+    return json.dumps(result[0])
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
