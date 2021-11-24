@@ -1,12 +1,19 @@
 import json
 from bson import ObjectId
 import os
-from flask import Flask
+from flask import Flask, request
 import pymongo
+from google.cloud import storage
+from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+import glob
 load_dotenv()
 
 app = Flask(__name__)
+
+UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER")
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 DB_PROJECT_NAME = os.environ.get('DB_PROJECT_NAME')
 DB_NAME = os.environ.get("DB_NAME")
@@ -69,13 +76,50 @@ def getMediaById(id):
     return json.dumps(media)
 
 
-@app.route('/api/media/<id>/locations')
+@app.route("/api/media/<id>/locations")
 def getMediaLocationById(id):
     result = []
     for location in locationsCollection.find({"media_id": {"$all": [id]}}):
         location['_id'] = str(location['_id'])
         result.append(location)
     return json.dumps(result)
+
+
+def upload_blob(bucket_name, source_file_name, destination_blob_name):
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+
+    blob.upload_from_filename(source_file_name)
+
+    print(
+        "File {} uploaded to {}.".format(
+            source_file_name, destination_blob_name
+        )
+    )
+
+
+@app.route("/api/user/<id>/photo", methods=["POST"])
+def postPhotoByUserId(id):
+    uploaded_file = request.files["file"]
+    if uploaded_file.filename != "":
+        try:
+            filename = secure_filename(uploaded_file.filename)
+            uploaded_file.save(os.path.join(
+                app.config["UPLOAD_FOLDER"], filename))
+
+            BUCKET_NAME = os.environ.get('BUCKET_NAME')
+            source_file_name = f"./images/{filename}"
+            destination_blob_name = f"postTest{id}"
+            upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
+        except(e):
+            return e
+
+        finally:
+            files = glob.glob("./images/*")
+            for file in files:
+                os.remove(file)
+    return f"Uploaded {source_file_name} as {destination_blob_name}"
 
 
 if __name__ == "__main__":
