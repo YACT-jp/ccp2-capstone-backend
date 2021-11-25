@@ -12,8 +12,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = os.environ.get("UPLOAD_FOLDER")
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = "./images"
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 DB_PROJECT_NAME = os.environ.get('DB_PROJECT_NAME')
