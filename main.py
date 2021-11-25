@@ -30,12 +30,7 @@ usersCollection = db['users']
 
 @app.route('/')
 def index():
-    return 'Hello World from Python'
-
-
-@app.route('/test')
-def test():
-    return 'test'
+    return 'You reached backend server for ccp2-capstone'
 
 
 @app.route('/api/media')
