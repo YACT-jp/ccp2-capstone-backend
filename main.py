@@ -114,7 +114,7 @@ def postPhotoByUserId(id):
             source_file_name = f"./images/{filename}"
             destination_blob_name = f"postTest{id}"
             upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
-        except(e):
+        except Exception as e:
             return e
 
         finally:
