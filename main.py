@@ -30,12 +30,7 @@ usersCollection = db['users']
 
 @app.route('/')
 def index():
-    return 'Hello World from Python'
-
-
-@app.route('/test')
-def test():
-    return 'test'
+    return 'You reached backend server for ccp2-capstone'
 
 
 @app.route('/api/media')
@@ -103,24 +98,27 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
 @app.route("/api/user/<id>/photo", methods=["POST"])
 def postPhotoByUserId(id):
+    if "file" not in request.files:
+        return "No file was attached in request"
+
     uploaded_file = request.files["file"]
-    if uploaded_file.filename != "":
-        try:
-            filename = secure_filename(uploaded_file.filename)
-            uploaded_file.save(os.path.join(
-                app.config["UPLOAD_FOLDER"], filename))
+    try:
+        filename = secure_filename(uploaded_file.filename)
+        uploaded_file.save(os.path.join(
+            app.config["UPLOAD_FOLDER"], filename))
 
-            BUCKET_NAME = os.environ.get('BUCKET_NAME')
-            source_file_name = f"./images/{filename}"
-            destination_blob_name = f"postTest{id}"
-            upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
-        except Exception as e:
-            return e
+        BUCKET_NAME = os.environ.get('BUCKET_NAME')
+        source_file_name = f"./images/{filename}"
+        destination_blob_name = f"postTest{id}"
+        upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
 
-        finally:
-            files = glob.glob("./images/*")
-            for file in files:
-                os.remove(file)
+    except Exception as e:
+        return repr(e)
+
+    finally:
+        files = glob.glob("./images/*")
+        for file in files:
+            os.remove(file)
     return f"Uploaded {source_file_name} as {destination_blob_name}"
 
 
