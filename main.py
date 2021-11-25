@@ -68,7 +68,7 @@ def getLocation(id):
         print(location)
         location['_id'] = str(location['_id'])
         result.append(location)
-    return json.dumps(result[0])
+    return json.dumps(result)
 
 
 @app.route('/api/media/<id>')
