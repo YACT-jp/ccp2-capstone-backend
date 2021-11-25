@@ -106,7 +106,7 @@ def userBookmarks(id):
         return "Bookmark Deleted"
         
 
-@app.route('/api/user/adduser')
+@app.route('/api/user/add')
 def addUser():
     newUser = request.get_json()
     user = usersCollection.insert_one(newUser)
