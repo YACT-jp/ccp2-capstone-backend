@@ -1,4 +1,5 @@
 import json
+from flask import request
 from bson import ObjectId
 import os
 from flask import Flask
@@ -88,6 +89,36 @@ def getUserById(id):
         user['_id'] = str(user['_id'])
         result.append(user)
     return json.dumps(result[0])
+
+@app.route('/api/user/<id>/bookmarks', methods = ['POST', 'GET', 'DELETE'])
+def userBookmarks(id):
+    if request.method == 'POST':
+        newUserBookmark = request.get_json()
+        addedB = usersCollection.update_one({"_id": ObjectId(id)}, {"$push":  {"bookmarks":  newUserBookmark}})
+        return "Bookmark Added"
+    elif request.method == 'GET':
+        userBookmarks = usersCollection.find_one({"_id": ObjectId(id)}, {"_id": False, "bookmarks": True})
+        print(userBookmarks)
+        return userBookmarks
+    elif request.method == 'DELETE':
+        deleteBookmark = request.get_json()
+        deletedB = usersCollection.update_one({"_id": ObjectId(id)}, {"$pull": { "bookmarks":  deleteBookmark}})
+        return "Bookmark Deleted"
+        
+
+# @app.route('/api/user/adduser/')
+# def addUser():
+#     newUser = request.get_json()
+#     user = usersCollection.insert(newUser)
+#     return user
+
+# @app.route('/api/user/addcontent')
+# def addContent():
+#     #post json doc
+#     userContent = usersCollection.insert()
+#     return json.dumps(userContent)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
