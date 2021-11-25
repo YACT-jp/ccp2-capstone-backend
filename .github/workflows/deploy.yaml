@@ -14,6 +14,8 @@ env:
   DB_PROJECT_NAME: ${{ secrets.DB_PROJECT_NAME }}
   DB_NAME: ${{ secrets.DB_NAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+  GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GOOGLE_APPLICATION_CREDENTIALS}}
+  UPLOAD_FOLDER: ${{secrets.UPLOAD_FOLDER}}
 
 jobs:
   deploy-to-cloud-run:
@@ -51,4 +53,6 @@ jobs:
           --set-env-vars DB_PROJECT_NAME=$DB_PROJECT_NAME \
           --set-env-vars DB_NAME=$DB_NAME \
           --set-env-vars DB_PASSWORD=$DB_PASSWORD \
+          --set-env-vars GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \ 
+          --set-env-vars UPLOAD_FOLDER=$UPLOAD_FOLDER \
           --quiet
