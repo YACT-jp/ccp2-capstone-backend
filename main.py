@@ -115,7 +115,7 @@ def postPhotoByUserId(id):
             destination_blob_name = f"postTest{id}"
             upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
         except Exception as e:
-            return e
+            return repr(e)
 
         finally:
             files = glob.glob("./images/*")
