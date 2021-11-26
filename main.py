@@ -125,38 +125,47 @@ def postPhotoByUserId(id):
 def getUserById(id):
     result = []
     print(type(id))
-    for user in usersCollection.find({"_id": ObjectId(id)}):
+    for user in usersCollection.find({"_id": id}):
         print(user)
         user['_id'] = str(user['_id'])
         result.append(user)
     return json.dumps(result)
 
 
-@app.route('/api/user/<id>/bookmarks', methods=['POST', 'GET', 'DELETE'])
+@app.route('/api/user/<id>/bookmarks', methods=['PATCH', 'GET', 'DELETE'])
 def userBookmarks(id):
-    if request.method == 'POST':
+    if request.method == 'PATCH':
         newUserBookmark = request.get_json()
         addedB = usersCollection.update_one(
-            {"_id": ObjectId(id)}, {"$push":  {"bookmarks":  newUserBookmark}})
+            {"_id": id}, {"$push":  {"bookmarks":  newUserBookmark}})
         return "Bookmark Added"
     elif request.method == 'GET':
+        result = []
         userBookmarks = usersCollection.find_one(
-            {"_id": ObjectId(id)}, {"_id": False, "bookmarks": True})
-        print(userBookmarks)
-        return userBookmarks
+            {"_id": id}, {"_id": False, "bookmarks": True})
+        result.append(userBookmarks)
+        return json.dumps(result)
     elif request.method == 'DELETE':
         deleteBookmark = request.get_json()
         deletedB = usersCollection.update_one(
-            {"_id": ObjectId(id)}, {"$pull": {"bookmarks":  deleteBookmark}})
+            {"_id": id}, {"$pull": {"bookmarks":  deleteBookmark}})
         return "Bookmark Deleted"
 
 
-@app.route('/api/user/add', methods=["POST"])
-def addUser():
-    newUser = request.get_json()
-    user = usersCollection.insert_one(newUser)
-    return "User Added"
-
+@app.route('/api/user/<id>/profile', methods=["PATCH", "GET"])
+def userProfile(id):
+    if request.method == 'PATCH':
+        editProfile = request.get_json()
+        for key, value in editProfile.items():
+            user = usersCollection.update_one( {"_id": id}, {"$push":  {key: value}})
+        return "Profile edited"
+    else:
+        result= []
+        profile = usersCollection.find_one(
+            {"_id": id}, {"_id": False, "username": True, "email": True, "bio": True, "avatar": True})
+        result.append(profile)
+        return json.dumps(result)
+        
 # @app.route('/api/user/addcontent')
 # def addContent():
 #     #post json doc
