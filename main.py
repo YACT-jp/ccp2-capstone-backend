@@ -122,7 +122,7 @@ def postPhotoByUserId(userId, locationId):
         files = glob.glob("./images/*")
         for file in files:
             os.remove(file)
-    return f"Uploaded {source_file_name} as {destination_blob_name}"
+    return "Upload success"
 
 
 @app.route('/api/user/<id>')
