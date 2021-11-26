@@ -134,6 +134,15 @@ def getPhotoByUserId(id):
     return json.dumps(photos)
 
 
+@app.route("/api/location/<id>/photo")
+def getPhotoByLocationId(id):
+    photos = []
+    for photo in photoCollection.find({"location_id": id}):
+        photos.append(photo)
+        photo["_id"] = str(photo["_id"])
+    return json.dumps(photos)
+
+
 @app.route('/api/user/<id>')
 def getUserById(id):
     result = []
