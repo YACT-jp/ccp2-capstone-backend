@@ -88,11 +88,7 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
     blob.upload_from_filename(source_file_name)
 
-    print(
-        "File {} uploaded to {}.".format(
-            source_file_name, destination_blob_name
-        )
-    )
+    return blob.public_url
 
 
 @app.route("/api/user/<id>/photo", methods=["POST"])
@@ -109,7 +105,7 @@ def postPhotoByUserId(id):
         BUCKET_NAME = os.environ.get('BUCKET_NAME')
         source_file_name = f"./images/{filename}"
         destination_blob_name = f"postTest{id}"
-        upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
+        url = upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
 
     except Exception as e:
         return repr(e)
