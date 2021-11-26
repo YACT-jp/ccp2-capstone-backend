@@ -125,6 +125,15 @@ def postPhotoByUserId(userId, locationId):
     return "Upload success"
 
 
+@app.route("/api/user/<id>/photo")
+def getPhotoByUserId(id):
+    photos = []
+    for photo in photoCollection.find({"user_id": id}):
+        photos.append(photo)
+        photo["_id"] = str(photo["_id"])
+    return json.dumps(photos)
+
+
 @app.route('/api/user/<id>')
 def getUserById(id):
     result = []
