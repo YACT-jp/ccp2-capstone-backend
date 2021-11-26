@@ -25,6 +25,7 @@ db = client['ccp2-capstone']
 mediaCollection = db['media']
 locationsCollection = db['locations']
 usersCollection = db['users']
+photoCollection = db["photos"]
 
 
 @app.route('/')
@@ -88,15 +89,11 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
     blob.upload_from_filename(source_file_name)
 
-    print(
-        "File {} uploaded to {}.".format(
-            source_file_name, destination_blob_name
-        )
-    )
+    return blob.public_url
 
 
-@app.route("/api/user/<id>/photo", methods=["POST"])
-def postPhotoByUserId(id):
+@app.route("/api/user/<userId>/location/<locationId>/photo", methods=["POST"])
+def postPhotoByUserId(userId, locationId):
     if "file" not in request.files:
         return "No file was attached in request"
 
@@ -109,7 +106,14 @@ def postPhotoByUserId(id):
         BUCKET_NAME = os.environ.get('BUCKET_NAME')
         source_file_name = f"./images/{filename}"
         destination_blob_name = f"postTest{id}"
-        upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
+
+        url = upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
+
+        photoCollection.insert_one({
+            "url": url,
+            "user_id": userId,
+            "location_id": locationId
+        })
 
     except Exception as e:
         return repr(e)
@@ -118,7 +122,25 @@ def postPhotoByUserId(id):
         files = glob.glob("./images/*")
         for file in files:
             os.remove(file)
-    return f"Uploaded {source_file_name} as {destination_blob_name}"
+    return "Upload success"
+
+
+@app.route("/api/user/<id>/photo")
+def getPhotoByUserId(id):
+    photos = []
+    for photo in photoCollection.find({"user_id": id}):
+        photos.append(photo)
+        photo["_id"] = str(photo["_id"])
+    return json.dumps(photos)
+
+
+@app.route("/api/location/<id>/photo")
+def getPhotoByLocationId(id):
+    photos = []
+    for photo in photoCollection.find({"location_id": id}):
+        photos.append(photo)
+        photo["_id"] = str(photo["_id"])
+    return json.dumps(photos)
 
 
 @app.route('/api/user/<id>')
