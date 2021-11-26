@@ -158,9 +158,12 @@ def getUserById(id):
 def userBookmarks(id):
     if request.method == 'PATCH':
         newUserBookmark = request.get_json()
-        addedB = usersCollection.update_one(
+        if newUserBookmark != None:
+            addedB = usersCollection.update_one(
             {"_id": id}, {"$push":  {"bookmarks":  newUserBookmark}})
-        return "Bookmark Added"
+            return "Bookmark Added"
+        else:
+            return "Error! There is no json body in the request."
     elif request.method == 'GET':
         result = []
         userBookmarks = usersCollection.find_one(
@@ -169,18 +172,24 @@ def userBookmarks(id):
         return json.dumps(result)
     elif request.method == 'DELETE':
         deleteBookmark = request.get_json()
-        deletedB = usersCollection.update_one(
-            {"_id": id}, {"$pull": {"bookmarks":  deleteBookmark}})
-        return "Bookmark Deleted"
+        if deleteBookmark != None:
+            deletedB = usersCollection.update_one(
+                {"_id": id}, {"$pull": {"bookmarks":  deleteBookmark}})
+            return "Bookmark Deleted"
+        else:
+            return "Error! There is no json body in the request."
 
 
 @app.route('/api/user/<id>/profile', methods=["PATCH", "GET"])
 def userProfile(id):
     if request.method == 'PATCH':
         editProfile = request.get_json()
-        for key, value in editProfile.items():
-            user = usersCollection.update_one( {"_id": id}, {"$push":  {key: value}})
-        return "Profile edited"
+        if editProfile != None:
+            for key, value in editProfile.items():
+                user = usersCollection.update_one( {"_id": id}, {"$set":  {key: value}})
+            return "Profile edited"
+        else:
+            return "Error! There is no json body in the request."
     else:
         result= []
         profile = usersCollection.find_one(
@@ -188,11 +197,6 @@ def userProfile(id):
         result.append(profile)
         return json.dumps(result)
         
-# @app.route('/api/user/addcontent')
-# def addContent():
-#     #post json doc
-#     userContent = usersCollection.insert()
-#     return json.dumps(userContent)
 
 
 if __name__ == "__main__":
