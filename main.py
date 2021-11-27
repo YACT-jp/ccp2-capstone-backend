@@ -6,8 +6,9 @@ from flask import Flask, request
 import pymongo
 from google.cloud import storage
 from werkzeug.utils import secure_filename
-from dotenv import load_dotenv
+from datetime import datetime
 import glob
+from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
@@ -105,15 +106,19 @@ def postPhotoByUserId(userId, locationId):
 
         BUCKET_NAME = os.environ.get('BUCKET_NAME')
         source_file_name = f"./images/{filename}"
-        destination_blob_name = f"postTest{id}"
+
+        # filename stored in the Cloud Storage
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        destination_blob_name = f"{userId}+{locationId}+{timestamp}"
 
         url = upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
 
-        photoCollection.insert_one({
+        cloudStorageData = {
             "url": url,
             "user_id": userId,
             "location_id": locationId
-        })
+        }
+        photoCollection.insert_one(cloudStorageData)
 
     except Exception as e:
         return repr(e)
@@ -122,7 +127,8 @@ def postPhotoByUserId(userId, locationId):
         files = glob.glob("./images/*")
         for file in files:
             os.remove(file)
-    return "Upload success"
+    cloudStorageData["_id"] = str(cloudStorageData["_id"])
+    return cloudStorageData
 
 
 @app.route("/api/user/<id>/photo")
@@ -184,6 +190,7 @@ def userBookmarks(id):
 def userProfile(id):
     if request.method == 'PATCH':
         editProfile = request.get_json()
+
         if editProfile != None:
             for key, value in editProfile.items():
                 user = usersCollection.update_one( {"_id": id}, {"$set":  {key: value}})
@@ -191,13 +198,11 @@ def userProfile(id):
         else:
             return "Error! There is no json body in the request."
     else:
-        result= []
+        result = []
         profile = usersCollection.find_one(
             {"_id": id}, {"_id": False, "username": True, "email": True, "bio": True, "avatar": True})
         result.append(profile)
-        return json.dumps(result)
-        
-
+        return json.dumps(result) 
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
