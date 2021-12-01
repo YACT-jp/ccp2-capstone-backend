@@ -13,8 +13,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.config['UPLOAD_FOLDER'] = os.path.join(
-    __file__.rstrip("/src/main.py"), "images")
+app.config['UPLOAD_FOLDER'] = "./src/images"
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
@@ -96,7 +95,6 @@ def postPhotoByUserId(userId, locationId):
         filename = secure_filename(uploadedFile.filename)
         filepath = os.path.join(
             app.config["UPLOAD_FOLDER"], filename)
-
         uploadedFile.save(filepath)
 
         # filename stored in the Cloud Storage
@@ -117,7 +115,7 @@ def postPhotoByUserId(userId, locationId):
         return repr(e)
 
     finally:
-        files = glob.glob("./images/*")
+        files = glob.glob(app.config['UPLOAD_FOLDER'] + "/*")
         for file in files:
             os.remove(file)
 
