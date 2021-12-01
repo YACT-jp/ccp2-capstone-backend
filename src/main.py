@@ -4,21 +4,24 @@ from bson import ObjectId
 import os
 from flask import Flask, request
 import pymongo
-from google.cloud import storage
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import glob
 from dotenv import load_dotenv
+from cloudStorage import upload_blob, delete_blob
 load_dotenv()
 
 app = Flask(__name__)
 
-app.config['UPLOAD_FOLDER'] = "./images"
+app.config['UPLOAD_FOLDER'] = os.path.join(
+    __file__.rstrip("/src/main.py"), "images")
+
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 DB_PROJECT_NAME = os.environ.get('DB_PROJECT_NAME')
 DB_NAME = os.environ.get("DB_NAME")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
+BUCKET_NAME = os.environ.get('BUCKET_NAME')
 
 client = pymongo.MongoClient(
     f"mongodb+srv://{DB_PROJECT_NAME}:{DB_PASSWORD}@cluster0.y0meq.mongodb.net/{DB_NAME}?retryWrites=true&w=majority&ssl=true&ssl_cert_reqs=CERT_NONE")
@@ -83,40 +86,30 @@ def getMediaLocationById(id):
     return json.dumps(result)
 
 
-def upload_blob(bucket_name, source_file_name, destination_blob_name):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
-
-    blob.upload_from_filename(source_file_name)
-
-    return blob.public_url
-
-
 @app.route("/api/user/<userId>/location/<locationId>/photo", methods=["POST"])
 def postPhotoByUserId(userId, locationId):
     if "file" not in request.files:
         return "No file was attached in request"
 
-    uploaded_file = request.files["file"]
+    uploadedFile = request.files["file"]
     try:
-        filename = secure_filename(uploaded_file.filename)
-        uploaded_file.save(os.path.join(
-            app.config["UPLOAD_FOLDER"], filename))
+        filename = secure_filename(uploadedFile.filename)
+        filepath = os.path.join(
+            app.config["UPLOAD_FOLDER"], filename)
 
-        BUCKET_NAME = os.environ.get('BUCKET_NAME')
-        source_file_name = f"./images/{filename}"
+        uploadedFile.save(filepath)
 
         # filename stored in the Cloud Storage
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        destination_blob_name = f"{userId}+{locationId}+{timestamp}"
+        destinationBlobName = f"{userId}+{locationId}+{timestamp}"
 
-        url = upload_blob(BUCKET_NAME, source_file_name, destination_blob_name)
+        url = upload_blob(BUCKET_NAME, filepath, destinationBlobName)
 
         cloudStorageData = {
             "url": url,
             "user_id": userId,
-            "location_id": locationId
+            "location_id": locationId,
+            "blob_name": destinationBlobName
         }
         photoCollection.insert_one(cloudStorageData)
 
@@ -127,8 +120,20 @@ def postPhotoByUserId(userId, locationId):
         files = glob.glob("./images/*")
         for file in files:
             os.remove(file)
+
     cloudStorageData["_id"] = str(cloudStorageData["_id"])
     return cloudStorageData
+
+
+@app.route("/api/photo/<id>", methods=["DELETE"])
+def deletePhotoByObjectId(id):
+    photoToDelete = photoCollection.find_one({"_id": ObjectId(id)})
+    try:
+        delete_blob(BUCKET_NAME, photoToDelete["blob_name"])
+        photoCollection.delete_one({"_id": ObjectId(id)})
+    except Exception as e:
+        return repr(e)
+    return id
 
 
 @app.route("/api/user/<id>/photo")
@@ -166,7 +171,7 @@ def userBookmarks(id):
         newUserBookmark = request.get_json()
         if newUserBookmark != None:
             addedB = usersCollection.update_one(
-            {"_id": id}, {"$push":  {"bookmarks":  newUserBookmark}})
+                {"_id": id}, {"$push":  {"bookmarks":  newUserBookmark}})
             return "Bookmark Added"
         else:
             return "Error! There is no json body in the request."
@@ -193,7 +198,8 @@ def userProfile(id):
 
         if editProfile != None:
             for key, value in editProfile.items():
-                user = usersCollection.update_one( {"_id": id}, {"$set":  {key: value}})
+                user = usersCollection.update_one(
+                    {"_id": id}, {"$set":  {key: value}})
             return "Profile edited"
         else:
             return "Error! There is no json body in the request."
@@ -202,7 +208,8 @@ def userProfile(id):
         profile = usersCollection.find_one(
             {"_id": id}, {"_id": False, "username": True, "email": True, "bio": True, "avatar": True})
         result.append(profile)
-        return json.dumps(result) 
+        return json.dumps(result)
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
