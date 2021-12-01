@@ -117,7 +117,7 @@ def postPhotoByUserId(userId, locationId):
         return repr(e)
 
     finally:
-        files = glob.glob("./images/*")
+        files = glob.glob(app.config['UPLOAD_FOLDER'] + "/*")
         for file in files:
             os.remove(file)
 
