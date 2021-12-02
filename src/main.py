@@ -39,10 +39,10 @@ def index():
 @app.route('/api/media')
 def getMedia():
     result = []
-    for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": False}):
+    for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": False, "poster_path": True}):
         print(tv)
         result.append(tv)
-    for movie in mediaCollection.find({"media_type": "movie"}, {"id": True, "name": "$title", "_id": False}):
+    for movie in mediaCollection.find({"media_type": "movie"}, {"id": True, "name": "$title", "_id": False, "poster_path": True}):
         print(movie)
         result.append(movie)
     return json.dumps(result)
