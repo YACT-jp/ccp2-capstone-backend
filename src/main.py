@@ -107,7 +107,8 @@ def postPhotoByUserId(userId, locationId):
             "url": url,
             "user_id": userId,
             "location_id": locationId,
-            "blob_name": destinationBlobName
+            "blob_name": destinationBlobName,
+            "timestamp": timestamp
         }
         photoCollection.insert_one(cloudStorageData)
 
