@@ -2,7 +2,7 @@ import json
 from flask import request
 from bson import ObjectId
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import pymongo
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -10,6 +10,10 @@ import glob
 from dotenv import load_dotenv
 from cloudStorage import upload_blob, delete_blob
 load_dotenv()
+import jwt
+from flask_bcrypt import Bcrypt
+from functools import wraps
+from flask_cors import CORS 
 
 app = Flask(__name__)
 
