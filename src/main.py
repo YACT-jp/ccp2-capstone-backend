@@ -7,7 +7,7 @@ import pymongo
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import glob
-from dotenv import load_dotenv, main
+from dotenv import load_dotenv
 from cloudStorage import upload_blob, delete_blob
 load_dotenv()
 
