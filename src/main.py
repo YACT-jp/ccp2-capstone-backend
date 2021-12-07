@@ -41,15 +41,18 @@ photoCollection = db["photos"]
 def tokenReq(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        print(request.headers["Authorization"])
         if "Authorization" in request.headers:
-            token = request.headers["Authorization"]
+            token = request.headers["Authorization"].replace("Bearer ", "")
             try:
-                jwt.decode(token, secret)
-            except:
-                return jsonify({"status": "fail", "message": "unauthorized"}), 401
+                jwt.decode(token, secret, algorithms=["HS256"])
+            except Exception as e:
+                return repr(e)
+                
+                #return jsonify({"status": "fail", "message": "unauthorized1"}), 401
             return f(*args, **kwargs)
         else:
-            return jsonify({"status": "fail", "message": "unauthorized"}), 401
+            return jsonify({"status": "fail", "message": "unauthorized2"}), 401
     return decorated
 
 
@@ -67,14 +70,14 @@ def auth():
         if user:
             #user['_id'] = str(user['_id'])
             if user:
-                time = datetime.utcnow() + timedelta(hours=24)
+                time = datetime.utcnow() + timedelta(hours=1)
                 token = jwt.encode({
                         "user": {
                             "email": f"{user['email']}",
                             "id": f"{user['_id']}",
                         },
                         "exp": time
-                    },secret)
+                    },secret,'HS256').decode('utf-8')
 
                 #del user['password']
 
@@ -119,6 +122,7 @@ def getMedia():
 
 
 @app.route('/api/locations')
+@tokenReq
 def getLocations():
     result = []
     for location in locationsCollection.find({}, {"plus_code": True, "name": True, "media_id": True, "_id": 1}):
@@ -129,6 +133,7 @@ def getLocations():
 
 
 @app.route('/api/locations/<id>')
+@tokenReq
 def getLocation(id):
     result = []
     print(type(id))
@@ -140,6 +145,7 @@ def getLocation(id):
 
 
 @app.route('/api/media/<id>')
+@tokenReq
 def getMediaById(id):
     media = mediaCollection.find_one({"id": int(id)})
     media['_id'] = str(media['_id'])
@@ -147,6 +153,7 @@ def getMediaById(id):
 
 
 @app.route("/api/media/<id>/locations")
+@tokenReq
 def getMediaLocationById(id):
     result = []
     for location in locationsCollection.find({"media_id": {"$all": [id]}}):
@@ -156,6 +163,7 @@ def getMediaLocationById(id):
 
 
 @app.route("/api/user/<userId>/location/<locationId>/photo", methods=["POST"])
+@tokenReq
 def postPhotoByUserId(userId, locationId):
     if "file" not in request.files:
         return "No file was attached in request"
@@ -195,6 +203,7 @@ def postPhotoByUserId(userId, locationId):
 
 
 @app.route("/api/photo/<id>", methods=["DELETE"])
+@tokenReq
 def deletePhotoByObjectId(id):
     photoToDelete = photoCollection.find_one({"_id": ObjectId(id)})
     try:
@@ -206,6 +215,7 @@ def deletePhotoByObjectId(id):
 
 
 @app.route("/api/user/<id>/photo")
+@tokenReq
 def getPhotoByUserId(id):
     photos = []
     for photo in photoCollection.find({"user_id": id}):
@@ -215,6 +225,7 @@ def getPhotoByUserId(id):
 
 
 @app.route("/api/location/<id>/photo")
+@tokenReq
 def getPhotoByLocationId(id):
     photos = []
     for photo in photoCollection.find({"location_id": id}):
@@ -224,6 +235,7 @@ def getPhotoByLocationId(id):
 
 
 @app.route('/api/user/<id>')
+@tokenReq
 def getUserById(id):
     result = []
     print(type(id))
@@ -235,6 +247,7 @@ def getUserById(id):
 
 
 @app.route('/api/user/<id>/bookmarks', methods=['PATCH', 'GET', 'DELETE'])
+@tokenReq
 def userBookmarks(id):
     if request.method == 'PATCH':
         newUserBookmark = request.get_json()
@@ -261,6 +274,7 @@ def userBookmarks(id):
 
 
 @app.route('/api/user/<id>/profile', methods=["PATCH", "GET"])
+@tokenReq
 def userProfile(id):
     if request.method == 'PATCH':
         editProfile = request.get_json()
