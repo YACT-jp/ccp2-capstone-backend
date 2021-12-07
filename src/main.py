@@ -7,7 +7,7 @@ import pymongo
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import glob
-from dotenv import load_dotenv
+from dotenv import load_dotenv, main
 from cloudStorage import upload_blob, delete_blob
 load_dotenv()
 
@@ -91,6 +91,7 @@ def postPhotoByUserId(userId, locationId):
         return "No file was attached in request"
 
     uploadedFile = request.files["file"]
+    description = request.form["description"]
     try:
         filename = secure_filename(uploadedFile.filename)
         filepath = os.path.join(
@@ -108,7 +109,8 @@ def postPhotoByUserId(userId, locationId):
             "user_id": userId,
             "location_id": locationId,
             "blob_name": destinationBlobName,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "description": description
         }
         photoCollection.insert_one(cloudStorageData)
 
