@@ -1,3 +1,7 @@
+from flask_cors import CORS
+from functools import wraps
+from flask_bcrypt import Bcrypt
+import jwt
 import json
 from flask import request
 from bson import ObjectId
@@ -10,10 +14,6 @@ import glob
 from dotenv import load_dotenv
 from cloudStorage import upload_blob, delete_blob
 load_dotenv()
-import jwt
-from flask_bcrypt import Bcrypt
-from functools import wraps
-from flask_cors import CORS 
 
 app = Flask(__name__)
 
@@ -48,13 +48,12 @@ def tokenReq(f):
                 jwt.decode(token, secret, algorithms=["HS256"])
             except Exception as e:
                 return repr(e)
-                
-                #return jsonify({"status": "fail", "message": "unauthorized1"}), 401
+
+                # return jsonify({"status": "fail", "message": "unauthorized1"}), 401
             return f(*args, **kwargs)
         else:
             return jsonify({"status": "fail", "message": "unauthorized2"}), 401
     return decorated
-
 
 
 @app.route('/api/auth', methods=['POST'])
@@ -68,16 +67,16 @@ def auth():
         user = db['users'].find_one({"email": f'{data["email"]}'})
 
         if user:
-            
+
             if user:
                 time = datetime.utcnow() + timedelta(hours=744)
                 token = jwt.encode({
-                        "user": {
-                            "email": f"{user['email']}",
-                            "id": f"{user['_id']}",
-                        },
-                        "exp": time
-                    },secret,'HS256').decode('utf-8')
+                    "user": {
+                        "email": f"{user['email']}",
+                        "id": f"{user['_id']}",
+                    },
+                    "exp": time
+                }, secret, 'HS256').decode('utf-8')
 
                 message = f"user authenticated"
                 code = 200
@@ -98,17 +97,19 @@ def auth():
         message = f"{ex}"
         code = 500
         status = "fail"
-    return jsonify({'status': status, "data": res_data, "message":message}), code
+    return jsonify({'status': status, "data": res_data, "message": message}), code
 
 
 @app.route('/')
 def index():
     return 'You reached backend server for ccp2-capstone'
 
+
 @app.route('/authtest')
 @tokenReq
 def index2():
     return 'Auth Successful'
+
 
 @app.route('/api/media')
 def getMedia():
