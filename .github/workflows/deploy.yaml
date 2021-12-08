@@ -15,6 +15,7 @@ env:
   DB_NAME: ${{ secrets.DB_NAME }}
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
   BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+  SUPER_DUPER_SECRET: ${{ secret.SUPER_DUPER_SECRET }}
 
 jobs:
   deploy-to-cloud-run:
@@ -53,4 +54,5 @@ jobs:
           --set-env-vars DB_NAME=$DB_NAME \
           --set-env-vars DB_PASSWORD=$DB_PASSWORD \
           --set-env-vars BUCKET_NAME=$BUCKET_NAME \
+          --set-env-vars SUPER_DUPER_SECRET=$SUPER_DUPER_SECRET \
           --quiet
