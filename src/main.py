@@ -20,7 +20,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = "./src/images"
 CORS(app, resources={r"/*": {"origins": "*"}})
 bcrypt = Bcrypt(app)
-secret = "mydirtylittlesecret"
+secret = os.environ.get('SUPER_DUPER_SECRET')
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
@@ -68,9 +68,9 @@ def auth():
         user = db['users'].find_one({"email": f'{data["email"]}'})
 
         if user:
-            #user['_id'] = str(user['_id'])
+            
             if user:
-                time = datetime.utcnow() + timedelta(hours=1)
+                time = datetime.utcnow() + timedelta(hours=744)
                 token = jwt.encode({
                         "user": {
                             "email": f"{user['email']}",
@@ -79,12 +79,10 @@ def auth():
                         "exp": time
                     },secret,'HS256').decode('utf-8')
 
-                #del user['password']
-
                 message = f"user authenticated"
                 code = 200
                 status = "successful"
-                res_data['token'] = token #.decode('utf-8')
+                res_data['token'] = token
                 res_data['user'] = user
 
             else:
