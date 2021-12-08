@@ -2,18 +2,25 @@ import json
 from flask import request
 from bson import ObjectId
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
 import pymongo
 from werkzeug.utils import secure_filename
-from datetime import datetime
+from datetime import datetime, timedelta
 import glob
 from dotenv import load_dotenv
 from cloudStorage import upload_blob, delete_blob
 load_dotenv()
+import jwt
+from flask_bcrypt import Bcrypt
+from functools import wraps
+from flask_cors import CORS 
 
 app = Flask(__name__)
 
 app.config['UPLOAD_FOLDER'] = "./src/images"
+CORS(app, resources={r"/*": {"origins": "*"}})
+bcrypt = Bcrypt(app)
+secret = os.environ.get('SUPER_DUPER_SECRET')
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
@@ -31,10 +38,77 @@ usersCollection = db['users']
 photoCollection = db["photos"]
 
 
+def tokenReq(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        print(request.headers["Authorization"])
+        if "Authorization" in request.headers:
+            token = request.headers["Authorization"].replace("Bearer ", "")
+            try:
+                jwt.decode(token, secret, algorithms=["HS256"])
+            except Exception as e:
+                return repr(e)
+                
+                #return jsonify({"status": "fail", "message": "unauthorized1"}), 401
+            return f(*args, **kwargs)
+        else:
+            return jsonify({"status": "fail", "message": "unauthorized2"}), 401
+    return decorated
+
+
+
+@app.route('/api/auth', methods=['POST'])
+def auth():
+    message = ""
+    res_data = {}
+    code = 500
+    status = "fail"
+    try:
+        data = request.get_json()
+        user = db['users'].find_one({"email": f'{data["email"]}'})
+
+        if user:
+            
+            if user:
+                time = datetime.utcnow() + timedelta(hours=744)
+                token = jwt.encode({
+                        "user": {
+                            "email": f"{user['email']}",
+                            "id": f"{user['_id']}",
+                        },
+                        "exp": time
+                    },secret,'HS256').decode('utf-8')
+
+                message = f"user authenticated"
+                code = 200
+                status = "successful"
+                res_data['token'] = token
+                res_data['user'] = user
+
+            else:
+                message = "wrong password"
+                code = 401
+                status = "fail"
+        else:
+            message = "invalid login details"
+            code = 401
+            status = "fail"
+
+    except Exception as ex:
+        message = f"{ex}"
+        code = 500
+        status = "fail"
+    return jsonify({'status': status, "data": res_data, "message":message}), code
+
+
 @app.route('/')
 def index():
     return 'You reached backend server for ccp2-capstone'
 
+@app.route('/authtest')
+@tokenReq
+def index2():
+    return 'Auth Successful'
 
 @app.route('/api/media')
 def getMedia():
