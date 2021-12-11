@@ -112,6 +112,7 @@ def index2():
 
 
 @app.route('/api/media')
+@tokenReq
 def getMedia():
     result = []
     for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": False, "poster_path": True, "overview": True}):
@@ -124,6 +125,7 @@ def getMedia():
 
 
 @app.route('/api/locations')
+@tokenReq
 def getLocations():
     result = []
     for location in locationsCollection.find({}, {"plus_code": True, "name": True, "media_id": True, "_id": 1}):
@@ -134,6 +136,7 @@ def getLocations():
 
 
 @app.route('/api/locations/<id>')
+@tokenReq
 def getLocation(id):
     result = []
     print(type(id))
@@ -145,6 +148,7 @@ def getLocation(id):
 
 
 @app.route('/api/media/<id>')
+@tokenReq
 def getMediaById(id):
     media = mediaCollection.find_one({"id": int(id)})
     media['_id'] = str(media['_id'])
@@ -152,6 +156,7 @@ def getMediaById(id):
 
 
 @app.route("/api/media/<id>/locations")
+@tokenReq
 def getMediaLocationById(id):
     result = []
     for location in locationsCollection.find({"media_id": {"$all": [id]}}):
@@ -161,6 +166,7 @@ def getMediaLocationById(id):
 
 
 @app.route("/api/user/<userId>/location/<locationId>/photo", methods=["POST"])
+@tokenReq
 def postPhotoByUserId(userId, locationId):
     if "file" not in request.files:
         return "No file was attached in request"
@@ -202,6 +208,7 @@ def postPhotoByUserId(userId, locationId):
 
 
 @app.route("/api/photo/<id>", methods=["DELETE"])
+@tokenReq
 def deletePhotoByObjectId(id):
     photoToDelete = photoCollection.find_one({"_id": ObjectId(id)})
     try:
@@ -213,6 +220,7 @@ def deletePhotoByObjectId(id):
 
 
 @app.route("/api/user/<id>/photo")
+@tokenReq
 def getPhotoByUserId(id):
     photos = []
     for photo in photoCollection.find({"user_id": id}):
@@ -222,6 +230,7 @@ def getPhotoByUserId(id):
 
 
 @app.route("/api/location/<id>/photo")
+@tokenReq
 def getPhotoByLocationId(id):
     photos = []
     for photo in photoCollection.find({"location_id": id}):
@@ -231,6 +240,7 @@ def getPhotoByLocationId(id):
 
 
 @app.route('/api/user/<id>')
+@tokenReq
 def getUserById(id):
     result = []
     print(type(id))
@@ -242,6 +252,7 @@ def getUserById(id):
 
 
 @app.route('/api/user/<id>/bookmarks', methods=['PATCH', 'GET', 'DELETE'])
+@tokenReq
 def userBookmarks(id):
     if request.method == 'PATCH':
         newUserBookmark = request.get_json()
@@ -268,6 +279,7 @@ def userBookmarks(id):
 
 
 @app.route('/api/user/<id>/profile', methods=["PATCH", "GET"])
+@tokenReq
 def userProfile(id):
     if request.method == 'PATCH':
         editProfile = request.get_json()
