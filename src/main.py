@@ -128,7 +128,7 @@ def getMedia():
 @tokenReq
 def getLocations():
     result = []
-    for location in locationsCollection.find({}, {"plus_code": True, "name": True, "media_id": True, "_id": 1}):
+    for location in locationsCollection.find({}):
         print(location)
         location['_id'] = str(location['_id'])
         result.append(location)
