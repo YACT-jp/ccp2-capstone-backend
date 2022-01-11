@@ -102,7 +102,7 @@ def auth():
 
 @app.route('/')
 def index():
-    return 'You reached backend server for ccp2-capstone'
+    return 'You reached backend server for E-Mina'
 
 
 @app.route('/authtest')
