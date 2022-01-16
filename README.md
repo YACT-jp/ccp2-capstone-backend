@@ -2,21 +2,59 @@
 
 ### / - root path
 
-Result: You reached backend server for E-Mina
-
 Parameter: None
+
+Result: You reached backend server for E-Mina
 
 ### POST /api/auth
 
+Parameter: JSON in request body with following format
+
 Result:
 
-Parameter:
+```json
+{
+  "_id": "<userId>",
+  "email": "<email>"
+}
+```
+
+Successful response:
+
+```json
+{
+  "data": {
+    "token": "<user token>",
+    "user": {
+      "_id": "<MongoDB ID>",
+      "bio": "<Biography>",
+      "bookmarks": "[array of location bookmark]",
+      "email": "<user email>",
+      "user_content": [],
+      "user_id": "<user email>",
+      "username": "<username>"
+    }
+  },
+  "message": "user authenticated",
+  "status": "successful"
+}
+```
+
+Unsuccessful response:
+
+```json
+{
+  "data": {},
+  "message": "invalid login details",
+  "status": "fail"
+}
+```
 
 ### GET /api/media
 
-Result: Return all media results
-
 Parameter: None
+
+Result: Return all media results
 
 Example:
 
@@ -24,11 +62,21 @@ Example:
 {URL}/api/media
 ```
 
+Successful response (Excerpt):
+
+```json
+[{"id": <id>, "name": "Death Note", "overview": "Light Yagami is an ace student with great prospects\u2014and he\u2019s
+bored out of his mind. But all that changes when he finds the Death Note, a notebook dropped by a rogue Shinigami death
+god. Any human whose name is written in the notebook dies, and Light has vowed to use the power of the Death Note to rid
+the world of evil. But will Light succeed in his noble goal, or will the Death Note turn him into the very thing he
+fights against?", "poster_path": "<url of image>"}]
+```
+
 ### GET /api/locations
 
-Result: Return all location results
-
 Parameter: None
+
+Result: Return all location results
 
 Example:
 
@@ -38,73 +86,73 @@ Example:
 
 ### GET /api/locations/<id>
 
-Result: Return detailed information about specific location
-
 Parameter: locationId
+
+Result: Return detailed information about specific location
 
 Example:
 
 ### GET /api/media/<id>
 
-Result: Return detailed information about specific media
-
 Parameter: mediaId
+
+Result: Return detailed information about specific media
 
 Example:
 
 ### GET /api/media/<id>/locations
 
-Result: Return all locations of given media
-
 Parameter: mediaId
+
+Result: Return all locations of given media
 
 Example:
 
 ### POST /api/user/<userId>/location/<locationId>/photo
 
-Result: Return all locations of given media
-
 Parameter: mediaId and locationId
+
+Result: Return all locations of given media
 
 Example:
 
 ### DELETE /api/photo/<id>
 
-Result: Delete photo information from database and Cloud storage
-
 Parameter: id (photoId)
+
+Result: Delete photo information from database and Cloud storage
 
 Example:
 
 ### GET /api/user/<id>
 
-Result: Return user information given userId
-
 Parameter: id (userId)
+
+Result: Return user information given userId
 
 Example:
 
 ### GET /api/user/<id>/photo
 
-Result: Return all photo information given userId
-
 Parameter: id (photoId)
+
+Result: Return all photo information given userId
 
 Example:
 
 ### GET /api/location/<id>/photo
 
-Result: Return all photo of specific location given id
-
 Parameter: id (locationId)
+
+Result: Return all photo of specific location given id
 
 Example:
 
 ### GET /api/user/<id>
 
-Result: Return all users given id
-
 RParameter: id (userId)
+
+Result: Return all users given id
 
 Example:
 
@@ -112,25 +160,25 @@ Example:
 
 GET
 
-Result: Return all saved locations (bookmarks) of given user
-
 Parameter: id (userID)
+
+Result: Return all saved locations (bookmarks) of given user
 
 Example:
 
 PATCH
 
-Result:
-
 Parameter: id (userID)
+
+Result:
 
 Example:
 
 DELETE
 
-Result:
-
 Parameter: id (userID)
+
+Result:
 
 Example:
 
@@ -138,12 +186,12 @@ Example:
 
 GET
 
-Result:
-
 Parameter:
+
+Result:
 
 PATCH
 
-Result:
-
 Parameter:
+
+Result:
