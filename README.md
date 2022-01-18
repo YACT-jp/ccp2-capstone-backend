@@ -14,8 +14,8 @@ Result: Token will expire in 31 days
 
 ```json
 {
-  "_id": "<userId>",
-  "email": "<email>"
+	"_id":"<userId>",
+	"email":"<email>"
 }
 ```
 
@@ -23,20 +23,20 @@ Successful response:
 
 ```json
 {
-  "data": {
-    "token": "<token>",
-    "user": {
-      "_id": "61af603bb6d8c8f8041bbff3",
-      "bio": "no bio",
-      "bookmarks": ["<array of locations>"],
-      "email": "<email>",
-      "user_content": [],
-      "user_id": "61af603bb6d8c8f8041bbff3",
-      "username": "<username>"
-    }
-  },
-  "message": "user authenticated",
-  "status": "successful"
+    "data": {
+        "token": "<token>",
+        "user": {
+            "_id": "61af603bb6d8c8f8041bbff3",
+            "bio": "no bio",
+            "bookmarks": ["<array of locations>"],
+            "email": "<email>",
+            "user_content": [],
+            "user_id": "61af603bb6d8c8f8041bbff3",
+            "username": "<username>"
+        }
+    },
+    "message": "user authenticated",
+    "status": "successful"
 }
 ```
 
@@ -44,19 +44,17 @@ Unsuccessful response:
 
 ```json
 {
-  "data": {},
-  "message": "invalid login details",
-  "status": "fail"
+    "data": {},
+    "message": "invalid login details",
+    "status": "fail"
 }
 ```
 
 ### GET /api/media
 
-Token required: Yes
-
 Parameter: None
 
-Result: Return all media results
+Result: Return all media results 
 
 Example:
 
@@ -104,13 +102,11 @@ Station",
 
 ### GET /api/locations
 
-Token required: Yes
-
 Parameter: None
 
-Result: Return all location results
+Result: Return all location results 
 
-Example:
+Example: 
 
 ```bash
 {URL}/api/locations
@@ -145,51 +141,49 @@ Station",
 
 ### GET /api/locations/<id>
 
-Token required: Yes
-
 Parameter: locationId
 
 Result: Return detailed information about specific location
 
-Example:
+Example: 
 
 ```bash
 {URL}/api/locations/6194639dbd51c43c5d434cd7
 ```
 
-Successful Response:
+Successful Response: 
 
 ```json
 [
-  {
-    "_id": "6194639dbd51c43c5d434cd7",
-    "coordinates": "{latitude: 35.6852600, longitude: 139.7299368}",
-    "description": "Taki has a date with Miki and the meeting point is outside Yotsuya station.",
-    "media_id": ["372058"],
-    "name": "Yotsuya Station",
-    "plus_code": "MPPH+4QH Shinjuku City, Tokyo",
-    "address": "1 Chome Yotsuya, Shinjuku City, Tokyo 160-0004",
-    "media_pic": [
-      "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.41.57.png"
-    ],
-    "loc_pics": [
-      "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.42.19.png"
-    ],
-    "media_name": "Your Name",
-    "location_pic": "https://upload.wikimedia.org/wikipedia/commons/3/37/Yotsuya-Sta-Akasaka.JPG"
-  }
+   {
+      "_id":"6194639dbd51c43c5d434cd7",
+      "coordinates":"{latitude: 35.6852600, longitude: 139.7299368}",
+      "description":"Taki has a date with Miki and the meeting point is outside Yotsuya station.",
+      "media_id":[
+         "372058"
+      ],
+      "name":"Yotsuya Station",
+      "plus_code":"MPPH+4QH Shinjuku City, Tokyo",
+      "address":"1 Chome Yotsuya, Shinjuku City, Tokyo 160-0004",
+      "media_pic":[
+         "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.41.57.png"
+      ],
+      "loc_pics":[
+         "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.42.19.png"
+      ],
+      "media_name":"Your Name",
+      "location_pic":"https://upload.wikimedia.org/wikipedia/commons/3/37/Yotsuya-Sta-Akasaka.JPG"
+   }
 ]
 ```
 
 ### GET /api/media/<id>
 
-Token required: Yes
-
 Parameter: mediaId
 
-Result: Return detailed information about specific media
+Result: Return detailed information about specific media 
 
-Example:
+Example: 
 
 ```bash
 {URL}/api/media/372058
@@ -226,39 +220,39 @@ occurrence continues to happen randomly, and the two must adjust their lives aro
 
 ### GET /api/media/<id>/locations
 
-Token required: Yes
-
 Parameter: mediaId
 
 Result: Return all locations of given media
 
-Example:
+Example: 
 
 ```bash
 {URL}/api/media/372058/locations
 ```
 
-Succesful Response:
+Succesful Response: 
 
 ```json
 [
-  {
-    "_id": "6194639dbd51c43c5d434cd7",
-    "coordinates": "{latitude: 35.6852600, longitude: 139.7299368}",
-    "description": "Taki has a date with Miki and the meeting point is outside Yotsuya station.",
-    "media_id": ["372058"],
-    "name": "Yotsuya Station",
-    "plus_code": "MPPH+4QH Shinjuku City, Tokyo",
-    "address": "1 Chome Yotsuya, Shinjuku City, Tokyo 160-0004",
-    "media_pic": [
-      "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.41.57.png"
-    ],
-    "loc_pics": [
-      "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.42.19.png"
-    ],
-    "media_name": "Your Name",
-    "location_pic": "https://upload.wikimedia.org/wikipedia/commons/3/37/Yotsuya-Sta-Akasaka.JPG"
-  }
+   {
+      "_id":"6194639dbd51c43c5d434cd7",
+      "coordinates":"{latitude: 35.6852600, longitude: 139.7299368}",
+      "description":"Taki has a date with Miki and the meeting point is outside Yotsuya station.",
+      "media_id":[
+         "372058"
+      ],
+      "name":"Yotsuya Station",
+      "plus_code":"MPPH+4QH Shinjuku City, Tokyo",
+      "address":"1 Chome Yotsuya, Shinjuku City, Tokyo 160-0004",
+      "media_pic":[
+         "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.41.57.png"
+      ],
+      "loc_pics":[
+         "https://japantour.xyz/wp-content/uploads/2019/11/Screen-Shot-2019-11-25-at-15.42.19.png"
+      ],
+      "media_name":"Your Name",
+      "location_pic":"https://upload.wikimedia.org/wikipedia/commons/3/37/Yotsuya-Sta-Akasaka.JPG"
+   }
 ]
 ```
 
@@ -272,86 +266,260 @@ Unsuccessful Reponse (if given ID does not exist):
 
 Parameter: mediaId and locationId
 
-Result: Return all locations of given media
+Others: user
 
-Example:
+Result: Upload photo to Google Cloud Storage and returns ObjectID of record in Mong
+
+Example: 
+
+```jsx
+var axios = require('axios');
+var FormData = require('form-data');
+var fs = require('fs');
+var data = new FormData();
+data.append('file', fs.createReadStream('/path/to/file'));
+
+var config = {
+  method: 'get',
+  url: '',
+  headers: { 
+    'Authorization': 'Bearer <your token>', 
+    ...data.getHeaders()
+  },
+  data : data
+};
+
+axios(config)
+.then(function (response) {
+  console.log(JSON.stringify(response.data));
+})
+.catch(function (error) {
+  console.log(error);
+});
+```
+
+Succesful Response: 
+
+```json
+{
+    "_id": "61e6ab9adaeb8421ec602624",
+    "blob_name": "61af603bb6d8c8f8041bbff3+6194670dbd51c43c5d434ce5+20220118115922",
+    "description": "This is radio Kaikan!",
+    "location_id": "6194670dbd51c43c5d434ce5",
+    "timestamp": "20220118115922",
+    "url": "<Link of image in Cloud Storage>",
+    "user_id": "61af603bb6d8c8f8041bbff3"
+}
+```
+
+Unsuccessful Response (if file is not attached): 
+
+```jsx
+FileNotFoundError(2, 'No such file or directory')
+```
 
 ### DELETE /api/photo/<id>
 
-Parameter: id (photoId)
+Parameter: photoId
 
 Result: Delete photo information from database and Cloud storage
 
-Example:
+Example: 
 
-### GET /api/user/<id>
+```bash
+{URL}/api/photo/61e6ab9adaeb8421ec602624
+```
 
-Parameter: id (userId)
+Successful Response (Returns PhotoID):
 
-Result: Return user information given userId
+```json
+61e6ab9adaeb8421ec602624
+```
 
-Example:
+Unsuccessful Response (This is given ID does not exist). Later fix this to return 404 Error properly.
+
+```jsx
+TypeError("'NoneType' object is not subscriptable")
+```
 
 ### GET /api/user/<id>/photo
 
-Parameter: id (photoId)
+Parameter: photoId
 
 Result: Return all photo information given userId
 
-Example:
+Example: 
+
+```bash
+{URL}/api/user/61b9e964f1273900d0901224/locations
+```
+
+Successful Response:
+
+```json
+[
+    {
+        "_id": "61b9e9cb0d0659a9a87dca66",
+        "url": "<Link of image in Cloud Storage>",
+        "user_id": "61b9e964f1273900d0901224",
+        "location_id": "61a33342080d12c9b9450e3e",
+        "blob_name": "61b9e964f1273900d0901224+61a33342080d12c9b9450e3e+20211215131243",
+        "timestamp": "20211215131243",
+        "description": "Looking for my nemesis, L... 😈🤓"
+    }
+]
+```
 
 ### GET /api/location/<id>/photo
 
-Parameter: id (locationId)
+Parameter: locationId
 
 Result: Return all photo of specific location given id
 
-Example:
+Example: 
+
+```bash
+{URL}/api/location/61946658bd51c43c5d434ce0/photo
+```
+
+Successful Response:
+
+```json
+[
+    {
+        "_id": "61b9e86c0d0659a9a87dca65",
+        "url": "https://storage.googleapis.com/ccp2-capstone-backend-image/619e29c9cb856caa2689ec35%2B61946658bd51c43c5d434ce0%2B20211215130651",
+        "user_id": "619e29c9cb856caa2689ec35",
+        "location_id": "61946658bd51c43c5d434ce0",
+        "blob_name": "619e29c9cb856caa2689ec35+61946658bd51c43c5d434ce0+20211215130651",
+        "timestamp": "20211215130651",
+        "description": "These long underground hallways... so spooky! 😱😱😱"
+    }
+]
+```
+
+Unsuccessful Response (location ID does not exist). 
+
+```json
+[]
+```
 
 ### GET /api/user/<id>
 
-RParameter: id (userId)
+Parameter: userId
 
-Result: Return all users given id
+Result: Return user information given userId
 
-Example:
+Example: 
+
+```bash
+{URL}/api/user/61b9e964f1273900d0901224
+```
+
+Successful Response:
+
+```json
+[
+    {
+        "_id": "61b9e964f1273900d0901224",
+        "username": "Light Yagami",
+        "email": "<email>",
+        "bio": "Up 2 no good 😈",
+        "bookmarks": [],
+        "user_content": [],
+        "user_id": "61b9e964f1273900d0901224"
+    }
+]
+```
+
+Unsuccessful Response(if ID does not exist). Fix this later to return HTTP 404 Status.
+
+```bash
+[]
+```
 
 ### GET | PATCH | DELETE /api/user/<id>/bookmarks
 
-GET
-
-Parameter: id (userID)
+Parameter: userId
 
 Result: Return all saved locations (bookmarks) of given user
 
-Example:
+Example: 
 
-PATCH
-
-Parameter: id (userID)
-
-Result:
-
-Example:
-
-DELETE
-
-Parameter: id (userID)
-
-Result:
-
-Example:
-
-### GET | PATCH /api/user/<id>/profile
+```json
+{URL}/api/user/61ab23e13b7a73c8388b422c/bookmarks
+```
 
 GET
 
-Parameter:
+Successful Response:
 
-Result:
+```json
+[
+    {
+        "bookmarks": [
+            {
+                "_id": "61a1d025080d12c9b9450e1a",
+                "name": "Shirakawa Hachiman Temple",
+                "coordinates": "{latitude: 36.254831, longitude: 136.905537}",
+                "description": "Ep. 16",
+                "location_pic": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Shirakawa-hachiman-jinja1.jpg/1280px-Shirakawa-hachiman-jinja1.jpg",
+                "media_id": [
+                    "31724"
+                ],
+                "plus_code": "7W34+W8 Shirakawa, Gifu",
+                "address": "559 Ogimachi, Shirakawa, Ono District, Gifu 501-5627",
+                "media_pic": [
+                    "https://img.mipon.org/wp-content/uploads/2018/12/04033801/Kururugi_Shrine_Lelouch_Susaku03.jpg",
+                    "https://img.mipon.org/wp-content/uploads/2018/12/04033753/Kururugi_Shrine_Susaku-1-e1544967533954.jpg"
+                ],
+                "loc_pics": [
+                    "https://img.mipon.org/wp-content/uploads/2018/12/04033700/Kururugi-temple_CodeGeass_RealLife.jpg"
+                ]
+            }
+        ]
+    }
+]
+```
+
+Unsuccessful Response (if userId does not exist):
+
+```json
+[null]
+```
 
 PATCH
 
-Parameter:
+Result: 
+
+DELETE 
+
+Result:
+
+### GET | PATCH /api/user/<id>/profile
+
+Parameter: userId
+
+Example:
+
+```bash
+{URL}/api/user/61ab23e13b7a73c8388b422c/profile
+```
+
+GET 
+
+Result:
+
+```json
+[
+    {
+        "username": "genkiRabbit",
+        "bio": "I'm a rabbit who hopped all the way to Japan",
+        "email": "<email>"
+    }
+]
+```
+
+PATCH 
 
 Result:
