@@ -256,7 +256,7 @@ Succesful Response:
 ]
 ```
 
-Unsuccessful Reponse (if given ID does not exist):
+Unsuccessful Response (if given ID does not exist):
 
 ```json
 []
@@ -490,11 +490,67 @@ Unsuccessful Response (if userId does not exist):
 
 PATCH
 
-Result: 
+Result:
 
-DELETE 
+Request Body: Give location information (example is below)
+
+```json
+{
+    "_id": "61a1d025080d12c9b9450e1a",
+    "name": "Shirakawa Hachiman Temple",
+    "coordinates": "{latitude: 36.254831, longitude: 136.905537}",
+    "description": "Ep. 16",
+    "location_pic": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Shirakawa-hachiman-jinja1.jpg/1280px-Shirakawa-hachiman-jinja1.jpg",
+    "media_id": [
+        "31724"
+    ],
+    "plus_code": "7W34+W8 Shirakawa, Gifu",
+    "address": "559 Ogimachi, Shirakawa, Ono District, Gifu 501-5627",
+    "media_pic": [
+        "https://img.mipon.org/wp-content/uploads/2018/12/04033801/Kururugi_Shrine_Lelouch_Susaku03.jpg",
+        "https://img.mipon.org/wp-content/uploads/2018/12/04033753/Kururugi_Shrine_Susaku-1-e1544967533954.jpg"
+    ],
+    "loc_pics": [
+        "https://img.mipon.org/wp-content/uploads/2018/12/04033700/Kururugi-temple_CodeGeass_RealLife.jpg"
+    ]
+ }
+```
+
+Successful Response:
+
+```json
+Bookmark Added
+```
+
+Unsuccessful Response: 
+
+```json
+Error! There is no json body in the request.
+```
+
+DELETE
+
+Request Body: locationId (this deletes bookmark that contains given id)
+
+```json
+{
+	"_id": "61a1d025080d12c9b9450e1a"
+}
+```
 
 Result:
+
+Successful Response:
+
+```bash
+Bookmark Deleted
+```
+
+Unsuccessful Response:
+
+```bash
+Error! There is no json body in the request.
+```
 
 ### GET | PATCH /api/user/<id>/profile
 
@@ -523,3 +579,23 @@ Result:
 PATCH 
 
 Result:
+
+Request Body: Attach JSON file that includes fields to change. Example modifies “bio.”
+
+```json
+{
+   "bio":"I am genkiRabbit"
+}
+```
+
+Successful Response:
+
+```json
+Profile edited
+```
+
+Unsuccessful Response:
+
+```json
+Error! There is no json body in the request.
+```
