@@ -48,8 +48,6 @@ def tokenReq(f):
                 jwt.decode(token, secret, algorithms=["HS256"])
             except Exception as e:
                 return repr(e)
-
-                # return jsonify({"status": "fail", "message": "unauthorized1"}), 401
             return f(*args, **kwargs)
         else:
             return jsonify({"status": "fail", "message": "unauthorized2"}), 401
