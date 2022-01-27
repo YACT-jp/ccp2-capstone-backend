@@ -41,7 +41,6 @@ photoCollection = db["photos"]
 def tokenReq(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        print(request.headers["Authorization"])
         if "Authorization" in request.headers:
             token = request.headers["Authorization"].replace("Bearer ", "")
             try:
@@ -107,10 +106,8 @@ def index2():
 def getMedia():
     result = []
     for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": False, "poster_path": True, "overview": True}):
-        print(tv)
         result.append(tv)
     for movie in mediaCollection.find({"media_type": "movie"}, {"id": True, "name": "$title", "_id": False, "poster_path": True, "overview": True}):
-        print(movie)
         result.append(movie)
     return json.dumps(result)
 
@@ -120,7 +117,6 @@ def getMedia():
 def getLocations():
     result = []
     for location in locationsCollection.find({}):
-        print(location)
         location['_id'] = str(location['_id'])
         result.append(location)
     return json.dumps(result)
@@ -130,9 +126,7 @@ def getLocations():
 @tokenReq
 def getLocation(id):
     result = []
-    print(type(id))
     for location in locationsCollection.find({"_id": ObjectId(id)}):
-        print(location)
         location['_id'] = str(location['_id'])
         result.append(location)
     return json.dumps(result)
@@ -234,9 +228,7 @@ def getPhotoByLocationId(id):
 @tokenReq
 def getUserById(id):
     result = []
-    print(type(id))
     for user in usersCollection.find({"_id": id}):
-        print(user)
         user['_id'] = str(user['_id'])
         result.append(user)
     return json.dumps(result)
