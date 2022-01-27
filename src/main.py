@@ -65,27 +65,20 @@ def auth():
         user = db['users'].find_one({"email": f'{data["email"]}'})
 
         if user:
+            time = datetime.utcnow() + timedelta(hours=744)
+            token = jwt.encode({
+                "user": {
+                    "email": f"{user['email']}",
+                    "id": f"{user['_id']}",
+                },
+                "exp": time
+            }, secret, 'HS256').decode('utf-8')
 
-            if user:
-                time = datetime.utcnow() + timedelta(hours=744)
-                token = jwt.encode({
-                    "user": {
-                        "email": f"{user['email']}",
-                        "id": f"{user['_id']}",
-                    },
-                    "exp": time
-                }, secret, 'HS256').decode('utf-8')
-
-                message = f"user authenticated"
-                code = 200
-                status = "successful"
-                res_data['token'] = token
-                res_data['user'] = user
-
-            else:
-                message = "wrong password"
-                code = 401
-                status = "fail"
+            message = f"user authenticated"
+            code = 200
+            status = "successful"
+            res_data['token'] = token
+            res_data['user'] = user
         else:
             message = "invalid login details"
             code = 401
