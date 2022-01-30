@@ -5,6 +5,7 @@ import jwt
 import json
 from flask import request
 from bson import ObjectId
+import bson
 import os
 from flask import Flask, request, jsonify
 import pymongo
@@ -49,7 +50,7 @@ def tokenReq(f):
                 return repr(e)
             return f(*args, **kwargs)
         else:
-            return jsonify({"status": "fail", "message": "unauthorized2"}), 401
+            return jsonify({"status": "fail", "message": "unauthorized"}), 401
     return decorated
 
 
@@ -125,11 +126,14 @@ def getLocations():
 @app.route('/api/locations/<id>')
 @tokenReq
 def getLocation(id):
-    result = []
-    for location in locationsCollection.find({"_id": ObjectId(id)}):
-        location['_id'] = str(location['_id'])
-        result.append(location)
-    return json.dumps(result)
+    try:
+        location = locationsCollection.find_one({"_id": ObjectId(id)})
+    except bson.errors.InvalidId as e:
+        return jsonify({"status": 400, "message": "Invalid ID Format"}), 400
+    if location is None:
+        return jsonify({"status": 404, "message": "Not Found"}), 404
+    location['_id'] = str(location['_id'])
+    return json.dumps(location)
 
 
 @app.route('/api/media/<id>')
