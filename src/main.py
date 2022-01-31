@@ -9,7 +9,6 @@ import bson
 import os
 from flask import Flask, request, jsonify
 import pymongo
-from pymongo.uri_parser import parse_host
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import glob
