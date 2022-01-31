@@ -9,6 +9,7 @@ import bson
 import os
 from flask import Flask, request, jsonify
 import pymongo
+from pymongo.uri_parser import parse_host
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 import glob
@@ -201,13 +202,19 @@ def postPhotoByUserId(userId, locationId):
 @app.route("/api/photo/<id>", methods=["DELETE"])
 @tokenReq
 def deletePhotoByObjectId(id):
-    photoToDelete = photoCollection.find_one({"_id": ObjectId(id)})
     try:
+        photoToDelete = photoCollection.find_one({"_id": ObjectId(id)})
+
+        if photoToDelete is None:
+            return jsonify({"status": 404, "message": "Not Found"}), 404
+
         delete_blob(BUCKET_NAME, photoToDelete["blob_name"])
         photoCollection.delete_one({"_id": ObjectId(id)})
+    except bson.errors.InvalidId as e:
+        return jsonify({"status": 400, "message": "Invalid ID Format"}), 400
     except Exception as e:
-        return repr(e)
-    return id
+        return repr(e), 500
+    return jsonify({"status": "successfully deleted", "id": id}), 200
 
 
 @app.route("/api/user/<id>/photo")
