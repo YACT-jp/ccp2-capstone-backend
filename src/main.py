@@ -140,6 +140,8 @@ def getLocation(id):
 @tokenReq
 def getMediaById(id):
     media = mediaCollection.find_one({"id": int(id)})
+    if media is None:
+        return jsonify({"status": 404, "message": "Not Found"}), 404
     media['_id'] = str(media['_id'])
     return json.dumps(media)
 
