@@ -3,7 +3,6 @@ from functools import wraps
 from flask_bcrypt import Bcrypt
 import jwt
 import json
-from flask import request
 from bson import ObjectId
 import bson
 import os
@@ -260,25 +259,29 @@ def userBookmarks(id):
     if request.method == 'PATCH':
         newUserBookmark = request.get_json()
         if newUserBookmark != None:
-            addedB = usersCollection.update_one(
+            user = usersCollection.update_one(
                 {"_id": id}, {"$push":  {"bookmarks":  newUserBookmark}})
-            return "Bookmark Added"
+            if user.matched_count == 0:
+                return jsonify({"status": 404, "message": "Not Found"}), 404
+            return jsonify({"status": "success", "message": "Bookmark Added"}), 200
         else:
-            return "Error! There is no json body in the request."
+            return jsonify({"status": "failure", "message": "No JSON was in request body"}), 400
     elif request.method == 'GET':
-        result = []
-        userBookmarks = usersCollection.find_one(
+        bookmarks = usersCollection.find_one(
             {"_id": id}, {"_id": False, "bookmarks": True})
-        result.append(userBookmarks)
-        return json.dumps(result)
+        if bookmarks is None:
+            return jsonify({"status": 404, "message": "Not Found"}), 404
+        return json.dumps(bookmarks)
     elif request.method == 'DELETE':
         deleteBookmark = request.get_json()
         if deleteBookmark != None:
-            deletedB = usersCollection.update_one(
+            user = usersCollection.update_one(
                 {"_id": id}, {"$pull": {"bookmarks":  deleteBookmark}})
-            return "Bookmark Deleted"
+            if user.matched_count == 0:
+                return jsonify({"status": 404, "message": "Not Found"}), 404
+            return jsonify({"status": "success", "message": "Bookmark successfuly deleted"}), 200
         else:
-            return "Error! There is no json body in the request."
+            return jsonify({"status": "failure", "message": "No JSON was in request body"}), 400
 
 
 @app.route('/api/user/<id>/profile', methods=["PATCH", "GET"])
