@@ -247,11 +247,11 @@ def getPhotoByLocationId(id):
 @app.route('/api/user/<id>')
 @tokenReq
 def getUserById(id):
-    result = []
-    for user in usersCollection.find({"_id": id}):
-        user['_id'] = str(user['_id'])
-        result.append(user)
-    return json.dumps(result)
+    user = usersCollection.find_one({"_id": id})
+    if user is None:
+        return jsonify({"status": 404, "message": "Not Found"}), 404
+    user['_id'] = str(user['_id'])
+    return json.dumps(user)
 
 
 @app.route('/api/user/<id>/bookmarks', methods=['PATCH', 'GET', 'DELETE'])
