@@ -3,8 +3,8 @@ from functools import wraps
 from flask_bcrypt import Bcrypt
 import jwt
 import json
-from flask import request
 from bson import ObjectId
+import bson
 import os
 from flask import Flask, request, jsonify
 import pymongo
@@ -23,7 +23,6 @@ bcrypt = Bcrypt(app)
 secret = os.environ.get('SUPER_DUPER_SECRET')
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
 DB_PROJECT_NAME = os.environ.get('DB_PROJECT_NAME')
 DB_NAME = os.environ.get("DB_NAME")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
@@ -41,18 +40,15 @@ photoCollection = db["photos"]
 def tokenReq(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        print(request.headers["Authorization"])
         if "Authorization" in request.headers:
             token = request.headers["Authorization"].replace("Bearer ", "")
             try:
                 jwt.decode(token, secret, algorithms=["HS256"])
             except Exception as e:
                 return repr(e)
-
-                # return jsonify({"status": "fail", "message": "unauthorized1"}), 401
             return f(*args, **kwargs)
         else:
-            return jsonify({"status": "fail", "message": "unauthorized2"}), 401
+            return jsonify({"status": "fail", "message": "unauthorized"}), 401
     return decorated
 
 
@@ -67,27 +63,20 @@ def auth():
         user = db['users'].find_one({"email": f'{data["email"]}'})
 
         if user:
+            time = datetime.utcnow() + timedelta(hours=744)
+            token = jwt.encode({
+                "user": {
+                    "email": f"{user['email']}",
+                    "id": f"{user['_id']}",
+                },
+                "exp": time
+            }, secret, 'HS256').decode('utf-8')
 
-            if user:
-                time = datetime.utcnow() + timedelta(hours=744)
-                token = jwt.encode({
-                    "user": {
-                        "email": f"{user['email']}",
-                        "id": f"{user['_id']}",
-                    },
-                    "exp": time
-                }, secret, 'HS256').decode('utf-8')
-
-                message = f"user authenticated"
-                code = 200
-                status = "successful"
-                res_data['token'] = token
-                res_data['user'] = user
-
-            else:
-                message = "wrong password"
-                code = 401
-                status = "fail"
+            message = f"user authenticated"
+            code = 200
+            status = "successful"
+            res_data['token'] = token
+            res_data['user'] = user
         else:
             message = "invalid login details"
             code = 401
@@ -116,10 +105,8 @@ def index2():
 def getMedia():
     result = []
     for tv in mediaCollection.find({"media_type": "tv"}, {"id": True, "name": True, "_id": False, "poster_path": True, "overview": True}):
-        print(tv)
         result.append(tv)
     for movie in mediaCollection.find({"media_type": "movie"}, {"id": True, "name": "$title", "_id": False, "poster_path": True, "overview": True}):
-        print(movie)
         result.append(movie)
     return json.dumps(result)
 
@@ -129,7 +116,6 @@ def getMedia():
 def getLocations():
     result = []
     for location in locationsCollection.find({}):
-        print(location)
         location['_id'] = str(location['_id'])
         result.append(location)
     return json.dumps(result)
@@ -138,19 +124,22 @@ def getLocations():
 @app.route('/api/locations/<id>')
 @tokenReq
 def getLocation(id):
-    result = []
-    print(type(id))
-    for location in locationsCollection.find({"_id": ObjectId(id)}):
-        print(location)
-        location['_id'] = str(location['_id'])
-        result.append(location)
-    return json.dumps(result)
+    try:
+        location = locationsCollection.find_one({"_id": ObjectId(id)})
+    except bson.errors.InvalidId as e:
+        return jsonify({"status": 400, "message": "Invalid ID Format"}), 400
+    if location is None:
+        return jsonify({"status": 404, "message": "Not Found"}), 404
+    location['_id'] = str(location['_id'])
+    return json.dumps(location)
 
 
 @app.route('/api/media/<id>')
 @tokenReq
 def getMediaById(id):
     media = mediaCollection.find_one({"id": int(id)})
+    if media is None:
+        return jsonify({"status": 404, "message": "Not Found"}), 404
     media['_id'] = str(media['_id'])
     return json.dumps(media)
 
@@ -174,9 +163,17 @@ def postPhotoByUserId(userId, locationId):
     uploadedFile = request.files["file"]
     description = request.form["description"]
     try:
+        # Check if locationId and mediaId exist
+        location = locationsCollection.find_one({"_id": ObjectId(locationId)})
+        user = usersCollection.find_one({"_id": userId})
+
+        if location is None:
+            return jsonify({"status": 404, "message": "LocationID Not Found"}), 404
+        if user is None:
+            return jsonify({"status": 404, "message": "UserID Not Found"}), 404
+
         filename = secure_filename(uploadedFile.filename)
-        filepath = os.path.join(
-            app.config["UPLOAD_FOLDER"], filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         uploadedFile.save(filepath)
 
         # filename stored in the Cloud Storage
@@ -195,9 +192,10 @@ def postPhotoByUserId(userId, locationId):
         }
         photoCollection.insert_one(cloudStorageData)
 
+    except bson.errors.InvalidId as e:
+        return jsonify({"status": 400, "message": "Invalid ID Format"}), 400
     except Exception as e:
         return repr(e)
-
     finally:
         files = glob.glob(app.config['UPLOAD_FOLDER'] + "/*")
         for file in files:
@@ -210,13 +208,19 @@ def postPhotoByUserId(userId, locationId):
 @app.route("/api/photo/<id>", methods=["DELETE"])
 @tokenReq
 def deletePhotoByObjectId(id):
-    photoToDelete = photoCollection.find_one({"_id": ObjectId(id)})
     try:
+        photoToDelete = photoCollection.find_one({"_id": ObjectId(id)})
+
+        if photoToDelete is None:
+            return jsonify({"status": 404, "message": "Not Found"}), 404
+
         delete_blob(BUCKET_NAME, photoToDelete["blob_name"])
         photoCollection.delete_one({"_id": ObjectId(id)})
+    except bson.errors.InvalidId as e:
+        return jsonify({"status": 400, "message": "Invalid ID Format"}), 400
     except Exception as e:
-        return repr(e)
-    return id
+        return repr(e), 500
+    return jsonify({"status": "successfully deleted", "id": id}), 200
 
 
 @app.route("/api/user/<id>/photo")
@@ -242,13 +246,11 @@ def getPhotoByLocationId(id):
 @app.route('/api/user/<id>')
 @tokenReq
 def getUserById(id):
-    result = []
-    print(type(id))
-    for user in usersCollection.find({"_id": id}):
-        print(user)
-        user['_id'] = str(user['_id'])
-        result.append(user)
-    return json.dumps(result)
+    user = usersCollection.find_one({"_id": id})
+    if user is None:
+        return jsonify({"status": 404, "message": "Not Found"}), 404
+    user['_id'] = str(user['_id'])
+    return json.dumps(user)
 
 
 @app.route('/api/user/<id>/bookmarks', methods=['PATCH', 'GET', 'DELETE'])
@@ -257,25 +259,29 @@ def userBookmarks(id):
     if request.method == 'PATCH':
         newUserBookmark = request.get_json()
         if newUserBookmark != None:
-            addedB = usersCollection.update_one(
+            user = usersCollection.update_one(
                 {"_id": id}, {"$push":  {"bookmarks":  newUserBookmark}})
-            return "Bookmark Added"
+            if user.matched_count == 0:
+                return jsonify({"status": 404, "message": "Not Found"}), 404
+            return jsonify({"status": "success", "message": "Bookmark Added"}), 200
         else:
-            return "Error! There is no json body in the request."
+            return jsonify({"status": "failure", "message": "No JSON was in request body"}), 400
     elif request.method == 'GET':
-        result = []
-        userBookmarks = usersCollection.find_one(
+        bookmarks = usersCollection.find_one(
             {"_id": id}, {"_id": False, "bookmarks": True})
-        result.append(userBookmarks)
-        return json.dumps(result)
+        if bookmarks is None:
+            return jsonify({"status": 404, "message": "Not Found"}), 404
+        return json.dumps(bookmarks)
     elif request.method == 'DELETE':
         deleteBookmark = request.get_json()
         if deleteBookmark != None:
-            deletedB = usersCollection.update_one(
+            user = usersCollection.update_one(
                 {"_id": id}, {"$pull": {"bookmarks":  deleteBookmark}})
-            return "Bookmark Deleted"
+            if user.matched_count == 0:
+                return jsonify({"status": 404, "message": "Not Found"}), 404
+            return jsonify({"status": "success", "message": "Bookmark successfuly deleted"}), 200
         else:
-            return "Error! There is no json body in the request."
+            return jsonify({"status": "failure", "message": "No JSON was in request body"}), 400
 
 
 @app.route('/api/user/<id>/profile', methods=["PATCH", "GET"])
@@ -288,15 +294,17 @@ def userProfile(id):
             for key, value in editProfile.items():
                 user = usersCollection.update_one(
                     {"_id": id}, {"$set":  {key: value}})
-            return "Profile edited"
+                if user.matched_count == 0:
+                    return jsonify({"status": 404, "message": "Not Found"}), 404
+            return jsonify({"status": "success", "message": "Profile edited"}), 200
         else:
-            return "Error! There is no json body in the request."
+            return jsonify({"status": "failure", "message": "No JSON was in request body"}), 400
     else:
-        result = []
         profile = usersCollection.find_one(
             {"_id": id}, {"_id": False, "username": True, "email": True, "bio": True, "avatar": True})
-        result.append(profile)
-        return json.dumps(result)
+        if profile is None:
+            return jsonify({"status": 404, "message": "Not Found"}), 404
+        return json.dumps(profile)
 
 
 if __name__ == "__main__":
