@@ -300,11 +300,13 @@ def userProfile(id):
         else:
             return jsonify({"status": "failure", "message": "No JSON was in request body"}), 400
     else:
+        result = []
         profile = usersCollection.find_one(
             {"_id": id}, {"_id": False, "username": True, "email": True, "bio": True, "avatar": True})
         if profile is None:
             return jsonify({"status": 404, "message": "Not Found"}), 404
-        return json.dumps(profile)
+        result.append(profile)
+        return json.dumps(result)
 
 
 if __name__ == "__main__":
