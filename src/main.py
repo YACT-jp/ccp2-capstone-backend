@@ -294,15 +294,17 @@ def userProfile(id):
             for key, value in editProfile.items():
                 user = usersCollection.update_one(
                     {"_id": id}, {"$set":  {key: value}})
-            return "Profile edited"
+                if user.matched_count == 0:
+                    return jsonify({"status": 404, "message": "Not Found"}), 404
+            return jsonify({"status": "success", "message": "Profile edited"}), 200
         else:
-            return "Error! There is no json body in the request."
+            return jsonify({"status": "failure", "message": "No JSON was in request body"}), 400
     else:
-        result = []
         profile = usersCollection.find_one(
             {"_id": id}, {"_id": False, "username": True, "email": True, "bio": True, "avatar": True})
-        result.append(profile)
-        return json.dumps(result)
+        if profile is None:
+            return jsonify({"status": 404, "message": "Not Found"}), 404
+        return json.dumps(profile)
 
 
 if __name__ == "__main__":
