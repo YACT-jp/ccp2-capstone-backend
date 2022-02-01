@@ -24,7 +24,6 @@ bcrypt = Bcrypt(app)
 secret = os.environ.get('SUPER_DUPER_SECRET')
 
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
 DB_PROJECT_NAME = os.environ.get('DB_PROJECT_NAME')
 DB_NAME = os.environ.get("DB_NAME")
 DB_PASSWORD = os.environ.get("DB_PASSWORD")
@@ -165,9 +164,17 @@ def postPhotoByUserId(userId, locationId):
     uploadedFile = request.files["file"]
     description = request.form["description"]
     try:
+        # Check if locationId and mediaId exist
+        location = locationsCollection.find_one({"_id": ObjectId(locationId)})
+        user = usersCollection.find_one({"_id": userId})
+
+        if location is None:
+            return jsonify({"status": 404, "message": "LocationID Not Found"}), 404
+        if user is None:
+            return jsonify({"status": 404, "message": "UserID Not Found"}), 404
+
         filename = secure_filename(uploadedFile.filename)
-        filepath = os.path.join(
-            app.config["UPLOAD_FOLDER"], filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         uploadedFile.save(filepath)
 
         # filename stored in the Cloud Storage
@@ -186,9 +193,10 @@ def postPhotoByUserId(userId, locationId):
         }
         photoCollection.insert_one(cloudStorageData)
 
+    except bson.errors.InvalidId as e:
+        return jsonify({"status": 400, "message": "Invalid ID Format"}), 400
     except Exception as e:
         return repr(e)
-
     finally:
         files = glob.glob(app.config['UPLOAD_FOLDER'] + "/*")
         for file in files:
